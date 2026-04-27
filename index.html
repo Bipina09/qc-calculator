@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced QC Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-clipboard-check"></i> QC Calculator</h1>
+            <p>Quality Control Evaluation System</p>
+        </header>
+
+        <div class="main-content" id="calculatorTab">
+            <!-- Basic Information Section -->
+            <section class="info-section">
+                <h2><i class="fas fa-info-circle"></i> Session Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time">Time:</label>
+                        <input type="time" id="time" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="shift">Shift:</label>
+                        <select id="shift" required>
+                            <option value="">Select Shift</option>
+                            <option value="morning">Morning Shift</option>
+                            <option value="afternoon">Afternoon Shift</option>
+                            <option value="evening">Evening Shift</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject/Title:</label>
+                        <input type="text" id="subject" placeholder="Enter subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="stream">Stream:</label>
+                        <input type="text" id="stream" placeholder="Enter stream" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mode">Mode:</label>
+                        <select id="mode" required>
+                            <option value="">Select Mode</option>
+                            <option value="online">Online</option>
+                            <option value="offline">Offline</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="activityType">Activity Type:</label>
+                        <select id="activityType" required>
+                            <option value="">Select Activity</option>
+                            <option value="regular_class">Regular Class</option>
+                            <option value="lab_practical">Lab / Practical Session</option>
+                            <option value="assessment">Assessment / Test</option>
+                            <option value="workshop">Workshop / Guest Lecture</option>
+                            <option value="mentoring">Mentoring Session</option>
+                            <option value="project_work">Project Work</option>
+                            <option value="orientation">Orientation / Induction</option>
+                            <option value="review_meeting">Review Meeting</option>
+                            <option value="field_visit">Field / Exposure Visit</option>
+                            <option value="showcase">Showcase / Presentation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="courseWeek">Course Week:</label>
+                        <select id="courseWeek" required>
+                            <option value="">Select Week</option>
+                            <option value="1">Week 1</option>
+                            <option value="2">Week 2</option>
+                            <option value="3">Week 3</option>
+                            <option value="4">Week 4</option>
+                            <option value="5">Week 5</option>
+                            <option value="6">Week 6</option>
+                            <option value="7">Week 7</option>
+                            <option value="8">Week 8</option>
+                            <option value="9">Week 9</option>
+                            <option value="10">Week 10</option>
+                            <option value="11">Week 11</option>
+                            <option value="12">Week 12</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="batch">Batch:</label>
+                        <input type="text" id="batch" placeholder="Enter batch" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="facultyName">Faculty Name:</label>
+                        <input type="text" id="facultyName" placeholder="Enter faculty name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="qcConductor">QC Conductor:</label>
+                        <input type="text" id="qcConductor" placeholder="Enter QC conductor name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="qcType">QC Type:</label>
+                        <select id="qcType" onchange="changeQCType()" required>
+                            <option value="">Select QC Type</option>
+                            <option value="student">Student QC</option>
+                            <option value="instructor">Instructor QC</option>
+                            <option value="class">Whole Class QC</option>
+                            <option value="resource">Resource QC</option>
+                            <option value="visit">Visit QC</option>
+                            <option value="showcase">Showcase QC</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Evaluation Criteria Section -->
+            <section class="criteria-section">
+                <h2><i class="fas fa-star"></i> <span id="criteriaTitle">Evaluation Criteria</span></h2>
+                <p class="rating-info">Rating Scale: 1 = Poor, 2 = Below Average, 3 = Average, 4 = Good, 5 = Excellent</p>
+                <div class="qc-type-indicator" id="qcTypeIndicator" style="display: none;">
+                    <span id="qcTypeText"></span>
+                </div>
+                
+                <div class="criteria-container" id="criteriaContainer">
+                    <!-- Criteria will be dynamically generated -->
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section">
+                <h2><i class="fas fa-chart-bar"></i> Results</h2>
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>Total Score</h3>
+                        <div class="score-display" id="totalScore">0/100</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>Percentage</h3>
+                        <div class="score-display" id="percentage">0%</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>Improvements Needed</h3>
+                        <div class="score-display" id="improvementsNeeded">-</div>
+                    </div>
+                    <div class="result-card">
+                        <h3>Performance</h3>
+                        <div class="score-display" id="performance">-</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Actions Section -->
+            <section class="actions-section">
+                <div class="action-buttons">
+                    <button class="btn btn-calculate" onclick="calculateResults()">
+                        <i class="fas fa-calculator"></i> Calculate
+                    </button>
+                    <button class="btn btn-save" onclick="saveAndExportEvaluation()">
+                        <i class="fas fa-save"></i> Save & Export
+                    </button>
+                    <button class="btn btn-export" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn btn-print" onclick="printResults()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                    <button class="btn btn-pareto" onclick="generateParetoAnalysis()">
+                        <i class="fas fa-sort-amount-down"></i> Problem Analysis
+                    </button>
+                    <button class="btn btn-flowchart" onclick="generateProcessFlowchart()">
+                        <i class="fas fa-project-diagram"></i> Process Flowchart
+                    </button>
+                    <button class="btn btn-clear" onclick="clearForm()">
+                        <i class="fas fa-broom"></i> Clear
+                    </button>
+                </div>
+            </section>
+
+            <!-- Pareto Problem Analysis Section -->
+            <section class="pareto-analysis-section" id="paretoAnalysisSection" style="display: none;">
+                <div class="pareto-header">
+                    <h2><i class="fas fa-sort-amount-down"></i> Problem & Potential Cause Analysis</h2>
+                    <button class="btn btn-clear btn-sm" onclick="closeParetoAnalysis()"><i class="fas fa-times"></i> Close</button>
+                </div>
+                <p class="pareto-subtitle">Criteria sorted by deficiency gap (biggest to smallest) with potential causes</p>
+                <div class="pareto-chart-container">
+                    <canvas id="paretoAnalysisChart"></canvas>
+                </div>
+                <div class="pareto-details" id="paretoDetails"></div>
+            </section>
+
+            <!-- Process Flowchart Section -->
+            <section class="flowchart-section" id="flowchartSection" style="display: none;">
+                <div class="flowchart-header">
+                    <h2><i class="fas fa-project-diagram"></i> SEP Process Flowchart</h2>
+                    <button class="btn btn-clear btn-sm" onclick="closeFlowchart()"><i class="fas fa-times"></i> Close</button>
+                </div>
+                <p class="flowchart-subtitle">Visual process flow of the school's QC journey — identify where things slow down or go wrong</p>
+                <div class="flowchart-legend" id="flowchartLegend"></div>
+                <div class="flowchart-canvas" id="flowchartCanvas"></div>
+                <div class="flowchart-insights" id="flowchartInsights"></div>
+            </section>
+
+            <!-- History Section -->
+            <section class="history-section">
+                <h2><i class="fas fa-history"></i> Evaluation History</h2>
+                <div class="history-controls">
+                    <button class="btn btn-export" onclick="exportEvaluationHistory()">
+                        <i class="fas fa-download"></i> Export History
+                    </button>
+                    <button class="btn btn-save" onclick="importEvaluationHistory()">
+                        <i class="fas fa-upload"></i> Import History
+                    </button>
+                    <input type="file" id="historyFileInput" accept=".json" style="display: none;" onchange="handleHistoryImport(event)">
+                </div>
+                <div class="history-container" id="historyContainer">
+                    <!-- History will be dynamically loaded -->
+                </div>
+            </section>
+
+            <!-- Overall QC Results Section -->
+            <section class="overall-results-section">
+                <h2><i class="fas fa-chart-line"></i> Overall QC Analysis</h2>
+                <div class="overall-controls">
+                    <button class="btn btn-calculate" onclick="generateOverallReport()">
+                        <i class="fas fa-analytics"></i> Generate Overall Report
+                    </button>
+                    <button class="btn btn-export" onclick="exportOverallToExcel()">
+                        <i class="fas fa-file-excel"></i> Export Overall Report
+                    </button>
+                    <div class="filter-controls">
+                        <select id="overallFilter" onchange="filterOverallResults()">
+                            <option value="all">All Evaluations</option>
+                            <option value="student">Student QC Only</option>
+                            <option value="instructor">Instructor QC Only</option>
+                            <option value="class">Class QC Only</option>
+                            <option value="resource">Resource QC Only</option>
+                            <option value="visit">Visit QC Only</option>
+                            <option value="showcase">Showcase QC Only</option>
+                        </select>
+                        <input type="date" id="dateFrom" placeholder="From Date">
+                        <input type="date" id="dateTo" placeholder="To Date">
+                    </div>
+                </div>
+                
+                <div class="overall-stats-grid" id="overallStatsGrid">
+                    <div class="stat-card">
+                        <h3>Total Evaluations</h3>
+                        <div class="stat-value" id="totalEvaluations">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Score</h3>
+                        <div class="stat-value" id="avgScore">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Best Performance</h3>
+                        <div class="stat-value" id="bestScore">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Improvement Needed</h3>
+                        <div class="stat-value" id="improvementAreas">-</div>
+                    </div>
+                </div>
+
+                <div class="overall-charts-container">
+                    <div class="chart-wrapper">
+                        <h3>Performance Trends</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                    <div class="chart-wrapper">
+                        <h3>QC Type Distribution</h3>
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="detailed-analysis" id="detailedAnalysis">
+                    <!-- Detailed analysis will be populated here -->
+                </div>
+            </section>
+
+            <!-- Progress Chart & Analysis Section -->
+            <section class="progress-chart-section">
+                <h2><i class="fas fa-line-chart"></i> Progress Chart & Analysis</h2>
+                <p class="section-subtitle">Track QC performance over time and identify areas requiring improvement</p>
+                
+                <div class="progress-controls">
+                    <button class="btn btn-calculate" onclick="generateProgressChart()">
+                        <i class="fas fa-chart-line"></i> Generate Progress Chart
+                    </button>
+                    <button class="btn btn-export" onclick="exportProgressReport()">
+                        <i class="fas fa-file-excel"></i> Export Progress Report
+                    </button>
+                    <button class="btn btn-export" onclick="exportProgressPDF()">
+                        <i class="fas fa-file-pdf"></i> Export as PDF
+                    </button>
+                </div>
+
+                <div class="progress-filters">
+                    <div class="filter-group">
+                        <label>From Date:</label>
+                        <input type="date" id="progressDateFrom">
+                    </div>
+                    <div class="filter-group">
+                        <label>To Date:</label>
+                        <input type="date" id="progressDateTo">
+                    </div>
+                    <div class="filter-group">
+                        <label>QC Type:</label>
+                        <select id="progressQCType">
+                            <option value="">All QC Types</option>
+                            <option value="student">Student QC</option>
+                            <option value="instructor">Instructor QC</option>
+                            <option value="class">Whole Class QC</option>
+                            <option value="resource">Resource QC</option>
+                            <option value="visit">Visit QC</option>
+                            <option value="showcase">Showcase QC</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Faculty/Subject:</label>
+                        <select id="progressFaculty">
+                            <option value="">All Faculty</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-calculate btn-sm" onclick="applyProgressFilters()">
+                        <i class="fas fa-filter"></i> Apply Filters
+                    </button>
+                    <button class="btn btn-clear btn-sm" onclick="resetProgressFilters()">
+                        <i class="fas fa-times"></i> Reset
+                    </button>
+                </div>
+
+                <div class="progress-stats-grid" id="progressStatsGrid">
+                    <div class="progress-stat-card">
+                        <div class="stat-label">Evaluations Tracked</div>
+                        <div class="stat-number" id="progressTotalEvals">0</div>
+                    </div>
+                    <div class="progress-stat-card">
+                        <div class="stat-label">Average Progress</div>
+                        <div class="stat-number" id="progressAverage">0%</div>
+                    </div>
+                    <div class="progress-stat-card">
+                        <div class="stat-label">Best Score</div>
+                        <div class="stat-number" id="progressBest">0%</div>
+                    </div>
+                    <div class="progress-stat-card">
+                        <div class="stat-label">Lowest Score</div>
+                        <div class="stat-number" id="progressLowest">0%</div>
+                    </div>
+                </div>
+
+                <div class="progress-charts-container">
+                    <!-- Overall Performance Trend -->
+                    <div class="progress-chart-wrapper">
+                        <h3><i class="fas fa-chart-line"></i> Performance Trend Over Time</h3>
+                        <canvas id="progressTrendChart"></canvas>
+                    </div>
+
+                    <!-- Areas Needing Improvement -->
+                    <div class="progress-chart-wrapper">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Areas Needing Improvement</h3>
+                        <canvas id="improvementAreasChart"></canvas>
+                    </div>
+
+                    <!-- Performance by Activity Type -->
+                    <div class="progress-chart-wrapper">
+                        <h3><i class="fas fa-tasks"></i> Performance by Activity Type</h3>
+                        <canvas id="activityTypeChart"></canvas>
+                    </div>
+
+                    <!-- Week-by-Week Progress -->
+                    <div class="progress-chart-wrapper">
+                        <h3><i class="fas fa-calendar-week"></i> Week-by-Week Progress</h3>
+                        <canvas id="weeklyProgressChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="progress-insights">
+                    <h3><i class="fas fa-lightbulb"></i> Key Insights & Recommendations</h3>
+                    <div class="insights-content" id="progressInsights">
+                        <p class="insights-placeholder">Generate a progress chart to see insights and recommendations</p>
+                    </div>
+                </div>
+
+                <div class="improvement-details">
+                    <h3><i class="fas fa-checklist"></i> Detailed Improvement Areas</h3>
+                    <div class="improvement-list" id="improvementDetailsList">
+                        <p class="details-placeholder">Generate a progress chart to see detailed improvement areas</p>
+                    </div>
+                </div>
+
+                <div class="progress-comparison">
+                    <h3><i class="fas fa-users"></i> Faculty/Subject Performance Comparison</h3>
+                    <canvas id="facultyComparisonChart"></canvas>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+    <script src="progress_chart_functions.js"></script>
+</body>
+</html>
