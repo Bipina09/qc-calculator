@@ -210,15 +210,9 @@ const wholeClassQCCriteria = [
     },
     {
         id: 11,
-        title: "Lab & Practical Session Effectiveness",
-        description: "Quality and effectiveness of hands-on training, practical experiments, and skill-building lab sessions",
+        title: "Engaging Activity",
+        description: "Quality and effectiveness of engaging activities, interactive sessions, and student participation through varied instructional methods",
         weight: 1.2
-    },
-    {
-        id: 12,
-        title: "Guest Lecture & Workshop Engagement",
-        description: "Class-level engagement, learning outcomes, and participation during guest lectures and external workshops",
-        weight: 1.1
     }
 ];
 
