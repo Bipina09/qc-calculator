@@ -996,10 +996,9 @@ function gatherEvaluationData() {
             time: document.getElementById('time').value,
             shift: document.getElementById('shift').value,
             subject: document.getElementById('subject').value,
-            stream: document.getElementById('stream').value,
             mode: document.getElementById('mode').value,
             batch: document.getElementById('batch').value,
-            facultyName: document.getElementById('facultyName').value,
+            facilitatorName: document.getElementById('facilitatorName').value,
             qcConductor: document.getElementById('qcConductor').value,
             qcType: document.getElementById('qcType').value,
             activityType: document.getElementById('activityType').value,
@@ -1022,7 +1021,7 @@ function gatherEvaluationData() {
 
 function validateForm() {
     // Check basic info
-    const requiredFields = ['date', 'time', 'shift', 'subject', 'stream', 'mode', 'activityType', 'courseWeek', 'batch', 'facultyName', 'qcConductor', 'qcType'];
+    const requiredFields = ['date', 'time', 'shift', 'subject', 'mode', 'activityType', 'courseWeek', 'batch', 'facilitatorName', 'qcConductor', 'qcType'];
     for (let field of requiredFields) {
         if (!document.getElementById(field).value.trim()) {
             return false;
@@ -1058,7 +1057,7 @@ function validateForm() {
 
 function validateForCalculation() {
     // Check basic info
-    const requiredFields = ['date', 'time', 'shift', 'subject', 'stream', 'mode', 'activityType', 'courseWeek', 'batch', 'facultyName', 'qcConductor', 'qcType'];
+    const requiredFields = ['date', 'time', 'shift', 'subject', 'mode', 'activityType', 'courseWeek', 'batch', 'facilitatorName', 'qcConductor', 'qcType'];
     for (let field of requiredFields) {
         if (!document.getElementById(field).value.trim()) {
             alert(`Please fill in the ${field.replace(/([A-Z])/g, ' $1').toLowerCase()} field.`);
@@ -1106,10 +1105,9 @@ function exportToPDF() {
     y += 10;
     doc.text(`Subject: ${basicInfo.subject}`, 20, y);
     y += 10;
-    doc.text(`Stream: ${basicInfo.stream}`, 20, y);
-    doc.text(`Batch: ${basicInfo.batch}`, 120, y);
+    doc.text(`Batch: ${basicInfo.batch}`, 20, y);
     y += 10;
-    doc.text(`Faculty: ${basicInfo.facultyName}`, 20, y);
+    doc.text(`Facilitator: ${basicInfo.facilitatorName}`, 20, y);
     y += 10;
     doc.text(`QC Conductor: ${basicInfo.qcConductor}`, 20, y);
     y += 10;
@@ -1165,7 +1163,7 @@ function exportToPDF() {
     });
     
     // Save the PDF
-    const fileName = `QC_Report_${basicInfo.facultyName}_${basicInfo.date}.pdf`;
+    const fileName = `QC_Report_${basicInfo.facilitatorName}_${basicInfo.date}.pdf`;
     doc.save(fileName);
 }
 
@@ -1202,10 +1200,9 @@ function exportToExcel() {
     data.push(['', '', '', 'Date:', basicInfo.date]);
     data.push(['', '', '', 'Time:', basicInfo.time]);
     data.push(['', '', '', 'Subject:', basicInfo.subject]);
-    data.push(['', '', '', 'Stream:', basicInfo.stream]);
     data.push(['', '', '', 'Mode:', basicInfo.mode]);
     data.push(['', '', '', 'Batch:', basicInfo.batch]);
-    data.push(['', '', '', 'Facilitator Name:', basicInfo.facultyName]);
+    data.push(['', '', '', 'Facilitator Name:', basicInfo.facilitatorName]);
     data.push(['', '', '', 'QC Conductor:', basicInfo.qcConductor]);
     data.push(['', '', '', 'Activity Type:', getActivityDisplayName(basicInfo.activityType)]);
     data.push(['', '', '', 'Course Week:', 'Week ' + (basicInfo.courseWeek || 'N/A')]);
@@ -1340,7 +1337,7 @@ function exportToExcel() {
     XLSX.utils.book_append_sheet(wb, ws, 'QC Evaluation');
     
     // Generate and save the file
-    const fileName = `QC_Report_${basicInfo.facultyName}_${basicInfo.date}_${basicInfo.time.replace(':', '')}.xlsx`;
+    const fileName = `QC_Report_${basicInfo.facilitatorName}_${basicInfo.date}_${basicInfo.time.replace(':', '')}.xlsx`;
     XLSX.writeFile(wb, fileName);
     
     // Show success message
@@ -1406,7 +1403,7 @@ async function loadHistory() {
         <div class="history-item">
             <div class="history-content" onclick="loadEvaluation(${evaluation.id})">
                 <div class="history-date">
-                    ${new Date(evaluation.timestamp).toLocaleDateString()} - ${evaluation.basicInfo?.facultyName || 'Unknown Faculty'}
+                    ${new Date(evaluation.timestamp).toLocaleDateString()} - ${evaluation.basicInfo?.facilitatorName || 'Unknown Facilitator'}
                 </div>
                 <div class="history-details">
                     ${evaluation.basicInfo?.subject || 'N/A'} | ${evaluation.basicInfo?.shift || 'N/A'} Shift | ${evaluation.basicInfo?.mode || 'N/A'}
@@ -1972,7 +1969,7 @@ function exportOverallToExcel() {
         
         summaryData.push([
             eval.basicInfo.date,
-            eval.basicInfo.facultyName,
+            eval.basicInfo.facilitatorName,
             getQCTypeDisplayName(eval.basicInfo.qcType),
             eval.basicInfo.subject,
             percentage + '%',
@@ -2048,6 +2045,195 @@ function exportEvaluationHistory() {
     
     alert(`Successfully exported ${savedEvaluations.length} evaluations to ${link.download}`);
 }
+
+async function exportAllEvaluationsToExcel() {
+    // Check if XLSX library is loaded
+    if (typeof XLSX === 'undefined') {
+        alert('Excel export library is not loaded. Please refresh the page and try again.');
+        return;
+    }
+    
+    // Load all evaluations from sync server or localStorage
+    const savedEvaluations = await loadFromSyncServer();
+    
+    if (savedEvaluations.length === 0) {
+        alert('No evaluations found to export.');
+        return;
+    }
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    
+    // ===== Sheet 1: Summary Sheet =====
+    const summaryData = [
+        ['QC EVALUATION SUMMARY REPORT'],
+        [''],
+        ['Export Date:', new Date().toLocaleString()],
+        ['Total Evaluations:', savedEvaluations.length],
+        [''],
+        ['S.N', 'Date', 'Class Type', 'Subject', 'Mode', 'QC Type', 'Score', 'Percentage', 'Performance']
+    ];
+    
+    savedEvaluations.forEach((evaluation, index) => {
+        const basicInfo = evaluation.basicInfo;
+        const results = evaluation.results;
+        
+        summaryData.push([
+            index + 1,
+            basicInfo.date || '',
+            getActivityDisplayName(basicInfo.activityType) || '',
+            basicInfo.subject || '',
+            basicInfo.mode || '',
+            basicInfo.qcType ? basicInfo.qcType.toUpperCase() : '',
+            results.totalScore ? results.totalScore.split('/')[0] : '',
+            results.percentage ? results.percentage.replace('%', '') : '',
+            results.percentage ? calculatePerformance(parseFloat(results.percentage)) : ''
+        ]);
+    });
+    
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    summarySheet['!cols'] = [
+        { wch: 6 },   // S.N
+        { wch: 12 },  // Date
+        { wch: 18 },  // Class Type
+        { wch: 20 },  // Subject
+        { wch: 12 },  // Mode
+        { wch: 12 },  // QC Type
+        { wch: 10 },  // Score
+        { wch: 12 },  // Percentage
+        { wch: 15 }   // Performance
+    ];
+    
+    // Style the header
+    for (let col = 0; col < 9; col++) {
+        const cellRef = XLSX.utils.encode_col(col) + '6';
+        if (summarySheet[cellRef]) {
+            summarySheet[cellRef].s = {
+                font: { bold: true, color: { rgb: "FFFFFF" }, size: 11 },
+                fill: { fgColor: { rgb: "366092" } },
+                alignment: { horizontal: "center", vertical: "center", wrapText: true },
+                border: {
+                    top: { style: "thin", color: { rgb: "000000" } },
+                    bottom: { style: "thin", color: { rgb: "000000" } },
+                    left: { style: "thin", color: { rgb: "000000" } },
+                    right: { style: "thin", color: { rgb: "000000" } }
+                }
+            };
+        }
+    }
+    
+    XLSX.utils.book_append_sheet(wb, summarySheet, "Summary");
+    
+    // ===== Sheet 2: Detailed Evaluations =====
+    const detailedData = [
+        ['DETAILED QC EVALUATIONS']
+    ];
+    
+    let rowIndex = 1;
+    
+    savedEvaluations.forEach((evaluation, evalIndex) => {
+        const basicInfo = evaluation.basicInfo;
+        const results = evaluation.results;
+        const ratings = evaluation.ratings || {};
+        
+        // Add evaluation header
+        detailedData.push(['']);
+        detailedData.push([`EVALUATION #${evalIndex + 1}`, '', '', '', '']);
+        detailedData.push(['Date:', basicInfo.date, 'Time:', basicInfo.time, '']);
+        detailedData.push(['Subject:', basicInfo.subject, 'Mode:', basicInfo.mode, '']);
+        detailedData.push(['Class Type:', getActivityDisplayName(basicInfo.activityType), 'QC Type:', basicInfo.qcType, '']);
+        detailedData.push(['Score:', `${results.totalScore ? results.totalScore.split('/')[0] : 0}/100`, 'Percentage:', results.percentage || '0%', '']);
+        detailedData.push(['']);
+        
+        // Add criteria details
+        const criteriaList = getCriteriaByType(basicInfo.qcType);
+        detailedData.push(['Criteria', 'Rating', 'Remarks']);
+        
+        criteriaList.forEach((criteria) => {
+            const rating = ratings[criteria.id] || '-';
+            const remarks = evaluation.remarks ? evaluation.remarks[criteria.id] || '' : '';
+            detailedData.push([criteria.title, rating, remarks]);
+        });
+    });
+    
+    const detailedSheet = XLSX.utils.aoa_to_sheet(detailedData);
+    detailedSheet['!cols'] = [
+        { wch: 35 },  // Criteria
+        { wch: 10 },  // Rating
+        { wch: 40 }   // Remarks
+    ];
+    
+    XLSX.utils.book_append_sheet(wb, detailedSheet, "Details");
+    
+    // ===== Sheet 3: Statistics =====
+    const statsData = [
+        ['QC STATISTICS AND ANALYSIS'],
+        [''],
+        ['Total Evaluations:', savedEvaluations.length],
+        ['']
+    ];
+    
+    // Group by QC Type
+    const qcTypeGroups = {};
+    savedEvaluations.forEach(eval => {
+        const type = eval.basicInfo.qcType || 'Unknown';
+        if (!qcTypeGroups[type]) {
+            qcTypeGroups[type] = [];
+        }
+        qcTypeGroups[type].push(eval);
+    });
+    
+    statsData.push(['EVALUATIONS BY QC TYPE', '']);
+    statsData.push(['QC Type', 'Count', 'Avg Score']);
+    
+    Object.keys(qcTypeGroups).forEach(type => {
+        const evals = qcTypeGroups[type];
+        const avgScore = evals.reduce((sum, eval) => {
+            const score = parseFloat(eval.results.totalScore ? eval.results.totalScore.split('/')[0] : 0);
+            return sum + score;
+        }, 0) / evals.length;
+        
+        statsData.push([type.toUpperCase(), evals.length, avgScore.toFixed(2)]);
+    });
+    
+    statsData.push(['']);
+    
+    // Group by Performance Level
+    const perfLevels = { excellent: 0, good: 0, average: 0, below_avg: 0, poor: 0 };
+    savedEvaluations.forEach(eval => {
+        const level = getPerformanceCategory(eval.results.percentage);
+        perfLevels[level]++;
+    });
+    
+    statsData.push(['PERFORMANCE DISTRIBUTION', '']);
+    statsData.push(['Performance Level', 'Count']);
+    Object.keys(perfLevels).forEach(level => {
+        statsData.push([level.replace('_', ' ').toUpperCase(), perfLevels[level]]);
+    });
+    
+    const statsSheet = XLSX.utils.aoa_to_sheet(statsData);
+    statsSheet['!cols'] = [{ wch: 25 }, { wch: 15 }];
+    
+    XLSX.utils.book_append_sheet(wb, statsSheet, "Statistics");
+    
+    // Write the workbook
+    const fileName = `QC_All_Evaluations_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    alert(`✅ Successfully exported ${savedEvaluations.length} evaluations to Excel!\nFile: ${fileName}`);
+}
+
+// Helper function to get performance category
+function getPerformanceCategory(percentage) {
+    if (!percentage) return 'poor';
+    const score = parseFloat(percentage);
+    if (score >= 90) return 'excellent';
+    if (score >= 75) return 'good';
+    if (score >= 60) return 'average';
+    if (score >= 45) return 'below_avg';
+    return 'poor';
+}
+
 
 function importEvaluationHistory() {
     const fileInput = document.getElementById('historyFileInput');
