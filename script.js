@@ -213,6 +213,18 @@ const wholeClassQCCriteria = [
         title: "Engaging Activity",
         description: "Quality and effectiveness of engaging activities, interactive sessions, and student participation through varied instructional methods",
         weight: 1.2
+    },
+    {
+        id: 12,
+        title: "Class Punctuality",
+        description: "Timeliness of class start and end, adherence to schedule by both instructor and students",
+        weight: 1.1
+    },
+    {
+        id: 13,
+        title: "Class Disturbance Management",
+        description: "Effectiveness in managing and minimizing class disturbances due to technical errors, external interruptions, or other factors",
+        weight: 1.2
     }
 ];
 
